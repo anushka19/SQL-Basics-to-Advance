@@ -27,3 +27,23 @@ where actors_age > 70 and actors_age < 85;
 
 #Q2
 #6:33
+#movies that produced 500% profit and their rating was less than avg rating for all movies
+#cannot repeat where
+#movies that produced 500% profit
+select *,(revenue - budget)*100/budget as per_profit from financials 
+where (revenue - budget)*100/budget >= 500;
+
+#their rating was less than avg rating for all movies
+select * from movies where imdb_rating  < (
+select avg(imdb_rating) as avg_rating from movies);
+###########################################################
+select x.movie_id,x.per_profit,y.title 
+from (select *,
+(revenue - budget)*100/budget as per_profit 
+from financials 
+) x
+join (
+select * from movies where imdb_rating  < (
+select avg(imdb_rating) as avg_rating from movies)
+) y on x.movie_id = y.movie_id
+where per_profit >= 500
