@@ -23,27 +23,61 @@ from actors
 select actors_name,actors_age 
 from actors_age
 where actors_age > 70 and actors_age < 85;
-#we cannot access using x and y because they are internal names only written in brackets can be used
+SELECT 
+    *, (revenue - budget) * 100 / budget AS per_profit
+FROM
+    financials
+WHERE
+    (revenue - budget) * 100 / budget >= 500;
 
-#Q2
-#6:33
-#movies that produced 500% profit and their rating was less than avg rating for all movies
-#cannot repeat where
-#movies that produced 500% profit
-select *,(revenue - budget)*100/budget as per_profit from financials 
-where (revenue - budget)*100/budget >= 500;
+SELECT 
+    *
+FROM
+    movies
+WHERE
+    imdb_rating < (SELECT 
+            AVG(imdb_rating) AS avg_rating
+        FROM
+            movies);
+SELECT 
+    x.movie_id, x.per_profit, y.title
+FROM
+    (SELECT 
+        *, (revenue - budget) * 100 / budget AS per_profit
+    FROM
+        financials) x
+        JOIN
+    (SELECT 
+        *
+    FROM
+        movies
+    WHERE
+        imdb_rating < (SELECT 
+                AVG(imdb_rating) AS avg_rating
+            FROM
+                movies)) y ON x.movie_id = y.movie_id
+WHERE
+    per_profit >= 500;
 
-#their rating was less than avg rating for all movies
-select * from movies where imdb_rating  < (
-select avg(imdb_rating) as avg_rating from movies);
-###########################################################
-select x.movie_id,x.per_profit,y.title 
-from (select *,
+############CTE
+
+with x as (
+select *,
 (revenue - budget)*100/budget as per_profit 
 from financials 
-) x
-join (
-select * from movies where imdb_rating  < (
+),
+y as (
+	select * from movies where imdb_rating  < (
 select avg(imdb_rating) as avg_rating from movies)
-) y on x.movie_id = y.movie_id
+)
+select x.movie_id,x.per_profit,y.title ,y.imdb_rating
+from x
+join y
+on x.movie_id = y.movie_id
 where per_profit >= 500
+
+#Benefits
+# 1. simple queries - Query readability
+# 2. same result set can be used multiple times - Query reusability
+# give potential candidates for views - Visibility for creating Data views- data transformed version of table
+
